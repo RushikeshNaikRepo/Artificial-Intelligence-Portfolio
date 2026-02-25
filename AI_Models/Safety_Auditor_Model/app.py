@@ -5,66 +5,89 @@ import json
 import re
 
 # --- 1. CONFIGURATION ---
-# Use the key you found earlier
-# This tells the website to look for the key in the "Secrets" settings we will set later
-API_KEY = st.secrets["GEMINI_API_KEY"]
+try:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+except:
+    # Local fallback for VS Code testing
+    API_KEY = "AIzaSyAKsXZhXTzI12wkbCbA-r6isGz7tYm86KI"
+
 genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel('gemini-3-flash-preview')
 
-# UPDATED FOR 2026: 'gemini-3-flash-preview' is the current stable free-tier model
-MODEL_NAME = 'gemini-3-flash-preview'
-model = genai.GenerativeModel(MODEL_NAME)
+# --- 2. PAGE CONFIG ---
+st.set_page_config(page_title="SafetySense AI", page_icon="🛡️", layout="wide")
 
-st.set_page_config(page_title="SafetySense AI", page_icon="🛡️")
+# Sidebar
+st.sidebar.title("🛠️ Developer Info")
+st.sidebar.write("**Name:** Rushikesh Naik")
+st.sidebar.write("**Role:** Data Analyst / AI Developer")
+st.sidebar.divider()
+st.sidebar.info("This tool uses Gemini 3 Flash to audit industrial safety compliance via Computer Vision.")
+
+# --- 3. UI LAYOUT ---
 st.title("🛡️ SafetySense AI Auditor")
-st.caption("Powered by Gemini 3 Flash")
+st.write("Professional Site Compliance Dashboard")
+st.write("---")
 
-# --- 2. UPLOAD SECTION ---
-uploaded_file = st.file_uploader("Upload site photo...", type=["jpg", "jpeg", "png"])
+col1, col2 = st.columns([1, 1])
 
-if uploaded_file:
-    img = Image.open(uploaded_file)
-    st.image(img, caption='Workspace for Audit', use_container_width=True)
-    
-    if st.button("Generate Audit Report"):
-        with st.spinner('Gemini 3 is auditing...'):
-            try:
-                # We ask for a "Reasoning-First" audit
-                prompt = """
-                Perform a professional industrial safety audit. 
-                Check for PPE (Helmets, Vests), Trip Hazards, and Unsafe Behavior.
-                Return ONLY a JSON object. No markdown, no extra text.
-                Example: {"status": "Violation", "score": 3, "finding": "Worker missing helmet."}
-                """
-                
-                # Using the latest generation method
-                response = model.generate_content([prompt, img])
-                
-                # Cleanup: Just in case the AI adds ```json ... ```
-                clean_text = re.search(r'\{.*\}', response.text, re.DOTALL)
-                
-                if clean_json := clean_text:
-                    result = json.loads(clean_json.group())
+with col1:
+    st.markdown("### 📷 Site Image")
+    uploaded_file = st.file_uploader("Upload worksite photo...", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        st.image(img, caption='Uploaded Image', use_container_width=True)
+
+with col2:
+    st.markdown("### 📝 Audit Report")
+    if uploaded_file:
+        if st.button("🚀 Run Safety Audit"):
+            with st.spinner('AI Inspector is analyzing the site...'):
+                try:
+                    prompt = """
+                    Analyze this image for industrial safety compliance. 
+                    Check for PPE (Helmets, Vests, Gloves) and Hazards.
+                    Return ONLY a JSON object:
+                    {"status": "Safe" or "Violation", "score": 1-10, "finding": "detailed description"}
+                    """
+                    response = model.generate_content([prompt, img])
                     
-                    # --- 3. DISPLAY RESULTS ---
-                    st.divider()
-                    st.subheader("Audit Results")
-                    
-                    if result['status'] == "Safe":
-                        st.success(f"✅ STATUS: {result['status']}")
-                    else:
-                        st.error(f"⚠️ STATUS: {result['status']}")
+                    # Parsing JSON
+                    clean_json = re.search(r'\{.*\}', response.text, re.DOTALL)
+                    if clean_json:
+                        result = json.loads(clean_json.group())
                         
-                    st.metric("Safety Compliance Score", f"{result['score']}/10")
-                    st.info(f"**Inspector's Finding:** {result['finding']}")
-                else:
-                    st.warning("Audit generated but format was unexpected. See below:")
-                    st.write(response.text)
-
-            except Exception as e:
-                # If 404 happens again, we list the models for you automatically
-                st.error(f"Error: {e}")
-                if "404" in str(e):
-                    st.info("Searching for an available model on your account...")
-                    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                    st.write("Try replacing the MODEL_NAME in your code with one of these:")
-                    st.code(available_models)
+                        # Display Metrics
+                        if result['status'] == "Safe":
+                            st.success(f"✅ STATUS: {result['status']}")
+                        else:
+                            st.error(f"⚠️ STATUS: {result['status']}")
+                        
+                        st.metric("Compliance Score", f"{result['score']}/10")
+                        st.write(f"**Detailed Finding:** {result['finding']}")
+                        
+                        # --- DOWNLOAD BUTTON ---
+                        st.divider()
+                        report_text = f"""SAFETY AUDIT REPORT
+-------------------
+Status: {result['status']}
+Score: {result['score']}/10
+Timestamp: 2026-02-25
+-------------------
+Findings:
+{result['finding']}
+-------------------
+Generated by SafetySense AI (Developer: Rushikesh Naik)
+"""
+                        st.download_button(
+                            label="📥 Download Audit Report",
+                            data=report_text,
+                            file_name=f"Safety_Audit_{result['status']}.txt",
+                            mime="text/plain"
+                        )
+                    else:
+                        st.write(response.text)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+    else:
+        st.info("Please upload an image to generate a report.")
