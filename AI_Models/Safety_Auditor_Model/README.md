@@ -1,5 +1,8 @@
 🛡️ SafetySense AI: The Automated Worksite Inspector
+
+
 What is this?
+
 SafetySense AI is a smart tool I built to help construction and warehouse managers keep their teams safe. Instead of someone having to manually check every photo or video for safety gear, this AI does it automatically. It "looks" at a picture of a worksite and instantly tells you if people are wearing their helmets and vests, or if there are any dangerous trip hazards on the floor.
 
 Why I built this
