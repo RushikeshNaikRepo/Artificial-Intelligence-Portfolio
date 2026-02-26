@@ -9,7 +9,7 @@ try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
 except:
     # Local fallback for VS Code testing
-    API_KEY = "AIzaSyAKsXZhXTzI12wkbCbA-r6isGz7tYm86KI"
+    API_KEY = genai.configure(api_key=API_KEY)
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-3-flash-preview')
