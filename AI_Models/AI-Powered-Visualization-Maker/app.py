@@ -11,10 +11,9 @@ st.markdown("---")
 
 # Secure API Connections
 try:
-    # Google Client for Dashboard/Join Logic
+    # Gemini handles the structural/logic tasks
     google_client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-    
-    # Groq Client for Unlimited, Fast Chat
+    # Groq handles the high-speed data chatting
     groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except Exception as e:
     st.error("⚠️ API Keys Missing! Please check Streamlit Secrets for GEMINI_API_KEY and GROQ_API_KEY.")
@@ -39,14 +38,13 @@ if uploaded_file:
     
     if len(dfs) > 1:
         st.sidebar.subheader("🔗 Step 2: Relationships")
-        left_tab = st.sidebar.selectbox("Left Sheet", list(dfs.keys()))
-        right_tab = st.sidebar.selectbox("Right Sheet", list(dfs.keys()))
-        
+        left_tab = st.sidebar.selectbox("Left Table", list(dfs.keys()))
+        right_tab = st.sidebar.selectbox("Right Table", list(dfs.keys()))
         common_cols = list(set(dfs[left_tab].columns) & set(dfs[right_tab].columns))
         
         if common_cols:
             join_col = st.sidebar.selectbox("Join Key", common_cols)
-            # Cardinality Detection
+            # Cardinality Logic
             left_u = dfs[left_tab][join_col].is_unique
             right_u = dfs[right_tab][join_col].is_unique
             card = f"{'1' if left_u else 'M'}:{'1' if right_u else 'M'}"
@@ -55,8 +53,6 @@ if uploaded_file:
             if st.sidebar.button("Execute Join"):
                 active_df = pd.merge(dfs[left_tab], dfs[right_tab], on=join_col, how='inner')
                 st.success(f"Joined on {join_col}")
-        else:
-            st.sidebar.warning("No common columns found.")
 
     # --- 4. OUTPUT MODES ---
     st.write("### 🔍 Data Preview", active_df.head(5))
@@ -100,22 +96,32 @@ if uploaded_file:
         fig = px.bar(active_df, x=x_ax, y=y_ax) if v_type=="Bar" else px.pie(active_df, names=x_ax, values=y_ax)
         st.plotly_chart(fig, use_container_width=True)
 
-    # --- 5. CHAT WINDOW (MULTI-SHEET CONTEXT) ---
+    # --- 5. CHAT WINDOW (IMPROVED ANALYTICAL PROMPT) ---
     st.divider()
     st.subheader("💬 AI Chat Assistant (Groq)")
-    query = st.text_input("Ask about your data (e.g., 'Show orders from the Electronics category'):")
+    query = st.text_input("Ask about your data (e.g., 'Which Order_IDs are in the Electronics category?'):")
 
     if query:
-        with st.spinner("Analyzing all sheets..."):
-            # Inform Groq about every sheet uploaded so it can link data
-            context = ""
-            for name, sheet_df in dfs.items():
-                context += f"Sheet '{name}' columns: {sheet_df.columns.tolist()}. "
+        with st.spinner("Analyzing data rows..."):
+            # Create a data dictionary to pass to the AI
+            # We send the head of each sheet as a dictionary so the AI can 'see' the actual values
+            data_context = {name: df.to_dict(orient='records') for name, df in dfs.items()}
+            
+            system_instruction = f"""
+            You are a Precise Data Analyst. 
+            CONTEXT: You have access to the following data rows: {data_context}
+            
+            RULES:
+            1. Do NOT explain HOW to solve it or provide SQL code. 
+            2. PERFORM the analysis and give the FINAL answer based ONLY on the data provided.
+            3. If asked for a list (like Order IDs), list them clearly.
+            4. If the data is missing, say exactly what is missing.
+            """
             
             try:
                 chat_response = groq_client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": f"You are a data analyst. Context: {context}"},
+                        {"role": "system", "content": system_instruction},
                         {"role": "user", "content": query},
                     ],
                     model="llama-3.3-70b-versatile",
