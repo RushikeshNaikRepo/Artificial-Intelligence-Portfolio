@@ -56,8 +56,8 @@ if uploaded_file:
     available_cols = active_df.columns.tolist()
     chosen_filter_cols = st.sidebar.multiselect("Select Columns for Filters", options=available_cols)
     
-    # Updated: Continuous scales for gradients, Qualitative for discrete
-    color_palette = st.sidebar.selectbox("Color Palette (Gradients)", ["Viridis", "Plasma", "Cividis", "Magma", "Turbo", "Bluered"])
+    # User selects a professional scale
+    color_palette = st.sidebar.selectbox("Color Palette", ["Viridis", "Plasma", "Cividis", "Magma", "Turbo", "Bluered"])
     
     use_cond_format = st.sidebar.checkbox("Enable Conditional Formatting")
     highlight_val = 0
@@ -87,17 +87,19 @@ if uploaded_file:
             r2c1, r2c2 = st.columns(2)
             
             with r1c1:
-                # Use color_continuous_scale for histogram gradient
+                # Distribution Chart: Fixed the color scale logic
                 fig1 = px.histogram(filtered_df, x=num_cols[0], title=f"Distribution: {num_cols[0]}", 
-                                    color=num_cols[0], color_continuous_scale=color_palette)
+                                    color_discrete_sequence=[color_palette.lower()])
                 st.plotly_chart(fig1, use_container_width=True)
             
             with r1c2:
+                # Composition Chart: Qualitative colors for categorical data
                 fig2 = px.pie(filtered_df, names=cat_cols[0] if cat_cols else num_cols[0], values=num_cols[0], 
                               title="Composition Analysis", color_discrete_sequence=px.colors.qualitative.Safe)
                 st.plotly_chart(fig2, use_container_width=True)
 
             with r2c1:
+                # Conditional Formatting logic
                 if use_cond_format:
                     filtered_df['Status'] = filtered_df[num_cols[0]].apply(lambda x: 'Above Threshold' if x > highlight_val else 'Below Threshold')
                     fig3 = px.bar(filtered_df, x=cat_cols[0] if cat_cols else num_cols[0], y=num_cols[0], 
@@ -105,10 +107,11 @@ if uploaded_file:
                                   title="Comparison (Conditional)")
                 else:
                     fig3 = px.bar(filtered_df, x=cat_cols[0] if cat_cols else num_cols[0], y=num_cols[-1], 
-                                  title="Standard Comparison", color=num_cols[-1], color_continuous_scale=color_palette)
+                                  title="Standard Comparison", color_discrete_sequence=[color_palette.lower()])
                 st.plotly_chart(fig3, use_container_width=True)
 
             with r2c2:
+                # Correlation Analysis: Uses continuous scales correctly
                 fig4 = px.scatter(filtered_df, x=num_cols[0], y=num_cols[-1], color=num_cols[0], 
                                   color_continuous_scale=color_palette, title="Correlation Analysis")
                 st.plotly_chart(fig4, use_container_width=True)
@@ -116,13 +119,14 @@ if uploaded_file:
             st.warning("Please ensure your dataset contains numeric columns.")
 
     else:
+        # Individual Visualizations Menu
         st.subheader("🎨 Custom Visualization Menu")
         m1, m2, m3 = st.columns(3)
         with m1: v_type = st.selectbox("Chart Type", ["Bar", "Pie", "Line", "Scatter"])
         with m2: x_ax = st.selectbox("X-Axis", filtered_df.columns)
         with m3: y_ax = st.selectbox("Y-Axis", filtered_df.select_dtypes('number').columns)
         
-        if v_type == "Bar": fig = px.bar(filtered_df, x=x_ax, y=y_ax, color=y_ax, color_continuous_scale=color_palette)
+        if v_type == "Bar": fig = px.bar(filtered_df, x=x_ax, y=y_ax, color_discrete_sequence=[color_palette.lower()])
         elif v_type == "Pie": fig = px.pie(filtered_df, names=x_ax, values=y_ax)
         elif v_type == "Line": fig = px.line(filtered_df, x=x_ax, y=y_ax)
         else: fig = px.scatter(filtered_df, x=x_ax, y=y_ax, color=y_ax, color_continuous_scale=color_palette)
