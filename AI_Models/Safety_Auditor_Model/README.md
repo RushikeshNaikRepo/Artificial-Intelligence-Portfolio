@@ -1,51 +1,40 @@
+Gemini said
+This is a fantastic project, Rushikesh. It perfectly bridges the gap between high-level AI strategy and practical, on-the-ground safety utility. The use of Gemini 3 Flash for "reasoning" over visual data is a sharp choice for handling the nuance of worksite hazards.
+
+Here is your content formatted as a professional README.md file, optimized for GitHub or a portfolio.
+
 🛡️ SafetySense AI: The Automated Worksite Inspector
+SafetySense AI is an intelligent vision tool designed to assist construction and warehouse managers in maintaining rigorous safety standards. By replacing manual oversight with automated AI analysis, the platform ensures that safety protocols are followed consistently and objectively.
 
-What is this?
+📌 Project Overview
+In large-scale industrial environments, monitoring every corner of a site simultaneously is a significant challenge. SafetySense AI allows managers to upload photos or video stills to receive an instantaneous "Safety Audit." The AI "looks" at the workspace to identify compliance with safety gear and detect environmental hazards before accidents occur.
 
-SafetySense AI is a smart tool I built to help construction and warehouse managers keep their teams safe. Instead of someone having to manually check every photo or video for safety gear, this AI does it automatically. It "looks" at a picture of a worksite and instantly tells you if people are wearing their helmets and vests, or if there are any dangerous trip hazards on the floor.
+🚀 Key Features
+Instant PPE Detection: Automatically identifies hard hats, high-visibility vests, and safety glasses.
 
+Hazard Spotting: Detects cluttered walkways, blocked emergency exits, or high-risk behaviors.
 
+Safety Scoring: Generates a simple risk grade from 1 to 10, providing an immediate snapshot of site safety.
 
-Why I built this
+Automated Reporting: Findings can be downloaded as a text file for integration into daily safety logs and compliance records.
 
-In big industries, safety is the number one priority, but it’s hard to monitor every corner of a site at once. I wanted to create a simple, easy-to-use app where a manager can upload a quick photo and get an objective "Safety Audit" in seconds. It’s about using modern AI to prevent accidents before they happen.
+🛠️ The Tech Stack
+The Brain: Powered by Google Gemini 3 Flash (Multimodal AI capable of sophisticated visual reasoning).
 
-
-
-Key Features
-
-Instant PPE Detection: Automatically checks for hard hats, high-visibility vests, and safety glasses.
-
-Hazard Spotting: Identifies messy walkways, blocked exits, or risky behavior.
-
-Safety Scoring: Gives the site a simple grade from 1 to 10 so you know exactly how risky the situation is.
-
-Record Keeping: You can download the AI's findings as a text file to keep for your daily safety reports.
-
-
-
-The Tech Behind It
-
-Brain: Powered by Google Gemini 3 Flash (a cutting-edge AI that can "see" and "reason").
-
-Body: Built using Streamlit, which turns Python code into a clean, interactive website.
+The Body: Built with Streamlit, transforming Python logic into a clean, interactive web interface.
 
 Language: Written entirely in Python.
 
+📖 How to Use
+Access: Open the live application link.
 
+Upload: Provide a photo of your workspace or construction site (JPG/PNG).
 
-How to Use It
+Analyze: Click the "Run Safety Audit" button.
 
-Open the live link.
+Review: Evaluate the safety score and detailed findings.
 
-Upload a photo of your workspace or construction site.
+Export: Download the report to save for your official records.
 
-Click "Run Safety Audit".
-
-Review the score and findings, and download the report if you need to save it!
-
-
-
-About the Developer
-
-Hi, I'm Rushikesh Naik. I’m a Data Analyst with a passion for building AI tools that solve real-world problems. This project is a mix of my interests in data strategy, automation, and workplace safety.
+👨‍💻 About the Developer
+Rushikesh Naik Data Analyst & AI Strategy Specialist I am a Data Analyst passionate about building AI tools that solve real-world problems. This project represents the intersection of my expertise in data strategy, automation, and a commitment to workplace safety.
