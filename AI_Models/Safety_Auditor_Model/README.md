@@ -1,8 +1,3 @@
-Gemini said
-This is a fantastic project, Rushikesh. It perfectly bridges the gap between high-level AI strategy and practical, on-the-ground safety utility. The use of Gemini 3 Flash for "reasoning" over visual data is a sharp choice for handling the nuance of worksite hazards.
-
-Here is your content formatted as a professional README.md file, optimized for GitHub or a portfolio.
-
 🛡️ SafetySense AI: The Automated Worksite Inspector
 SafetySense AI is an intelligent vision tool designed to assist construction and warehouse managers in maintaining rigorous safety standards. By replacing manual oversight with automated AI analysis, the platform ensures that safety protocols are followed consistently and objectively.
 
