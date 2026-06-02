@@ -1,93 +1,188 @@
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
-import json
-import re
+import os
+from pydantic import BaseModel, Field
 
-# --- 1. CONFIGURATION ---
+# --- 1. PAGE CONFIGURATION ---
+# Setting a wide layout with a dark/professional aesthetic hint
+st.set_page_config(
+    page_title="SafetySense AI Auditor",
+    page_icon="🛡️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# --- 2. CUSTOM ENTERPRISE UI/UX CSS ---
+# Injecting custom styles to change backgrounds, fonts, and borders
+st.markdown("""
+    <style>
+        /* Main App Background and Fonts */
+        .stApp {
+            background-color: #0F1216;
+            color: #E2E8F0;
+        }
+        
+        /* Headers styling */
+        h1, h2, h3 {
+            color: #F1F5F9 !important;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+        }
+        
+        /* Custom metric card wrapper */
+        .metric-card {
+            background-color: #1E2530;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #3B82F6;
+            margin-bottom: 15px;
+        }
+        
+        /* Sidebar styling adjustment */
+        [data-testid="stSidebar"] {
+            background-color: #151B23;
+            border-right: 1px solid #212B36;
+        }
+        
+        /* Divider color matching */
+        hr {
+            border-color: #2D3748 !important;
+        }
+    </style>
+""", unsafe_with_html=True)
+
+
+# --- 3. API INITIALIZATION & STRUCTURED OUTPUT SCHEMA ---
+# Define a Pydantic schema to guarantee JSON formatting from Gemini
+class SafetyAuditReport(BaseModel):
+    status: str = Field(description="Must be exactly either 'Safe' or 'Violation'")
+    score: int = Field(description="Compliance rating score from 1 to 10")
+    finding: str = Field(description="Highly detailed technical description of PPE elements or hazards found")
+
+# API Key secure routing
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
-except:
-    # Local fallback for VS Code testing
-    API_KEY = genai.configure(api_key=API_KEY)
+except Exception:
+    # Local fallback using environment variables or hardcoded string safely
+    API_KEY = os.environ.get("GEMINI_API_KEY", "YOUR_LOCAL_FALLBACK_KEY")
 
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3-flash-preview')
+if API_KEY and API_KEY != "YOUR_LOCAL_FALLBACK_KEY":
+    genai.configure(api_key=API_KEY)
+    # Using the native flash production-ready model
+    model = genai.GenerativeModel('gemini-3-flash-preview')
+else:
+    st.error("⚠️ Gemini API Key not found. Please configure it in st.secrets or environment variables.")
 
-# --- 2. PAGE CONFIG ---
-st.set_page_config(page_title="SafetySense AI", page_icon="🛡️", layout="wide")
 
-# Sidebar
-st.sidebar.title("🛠️ Developer Info")
-st.sidebar.write("**Name:** Rushikesh Naik")
-st.sidebar.write("**Role:** Data Analyst / AI Developer")
-st.sidebar.divider()
-st.sidebar.info("This tool uses Gemini 3 Flash to audit industrial safety compliance via Computer Vision.")
+# --- 4. SIDEBAR DEVELOPER PROFILE ---
+with st.sidebar:
+    st.markdown("## 🛡️ Control Panel")
+    st.markdown("---")
+    st.markdown("### 🛠️ Developer Profile")
+    
+    # Clean profile display block
+    st.markdown("""
+        **Name:** Rushikesh Naik  
+        **Role:** Data Analyst / AI Developer  
+    """)
+    st.divider()
+    st.info("Engineered using structured computer vision architectures to process high-reliability site safety diagnostics.")
 
-# --- 3. UI LAYOUT ---
+
+# --- 5. MAIN DASHBOARD UI ---
 st.title("🛡️ SafetySense AI Auditor")
-st.write("Professional Site Compliance Dashboard")
-st.write("---")
+st.markdown("<p style='color:#94A3B8; font-size:1.1rem;'>Enterprise Site Compliance & HSE Dashboard</p>", unsafe_with_html=True)
+st.markdown("---")
 
-col1, col2 = st.columns([1, 1])
+# Layout distribution
+col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.markdown("### 📷 Site Image")
-    uploaded_file = st.file_uploader("Upload worksite photo...", type=["jpg", "jpeg", "png"])
+    st.markdown("### 📷 Live Feed Capture / Upload")
+    uploaded_file = st.file_uploader("Drop worksite imagery here...", type=["jpg", "jpeg", "png"])
+    
     if uploaded_file:
         img = Image.open(uploaded_file)
-        st.image(img, caption='Uploaded Image', use_container_width=True)
+        
+        # PERFORMANCE BOOST: Downscale image size slightly to speed up API transmission network load
+        if img.size[0] > 1920:
+            img.thumbnail((1920, 1920))
+            
+        st.image(img, caption='Optimized Worksite Scan Target', use_container_width=True)
 
 with col2:
-    st.markdown("### 📝 Audit Report")
+    st.markdown("### 📝 Active Audit Output")
+    
     if uploaded_file:
-        if st.button("🚀 Run Safety Audit"):
-            with st.spinner('AI Inspector is analyzing the site...'):
+        if st.button("🚀 Execute Safety Scan", use_container_width=True):
+            with st.spinner('AI Analytics core parsing site visual signatures...'):
                 try:
                     prompt = """
-                    Analyze this image for industrial safety compliance. 
-                    Check for PPE (Helmets, Vests, Gloves) and Hazards.
-                    Return ONLY a JSON object:
-                    {"status": "Safe" or "Violation", "score": 1-10, "finding": "detailed description"}
+                    Perform a rigorous health, safety, and environment (HSE) audit on this work zone.
+                    Inspect closely for the presence or visual absence of hard hats (helmets), high-visibility vests, protective gloves, and footwear.
+                    Identify any open structural risks, trip hazards, or compliance variations.
                     """
-                    response = model.generate_content([prompt, img])
                     
-                    # Parsing JSON
-                    clean_json = re.search(r'\{.*\}', response.text, re.DOTALL)
-                    if clean_json:
-                        result = json.loads(clean_json.group())
-                        
-                        # Display Metrics
-                        if result['status'] == "Safe":
-                            st.success(f"✅ STATUS: {result['status']}")
-                        else:
-                            st.error(f"⚠️ STATUS: {result['status']}")
-                        
-                        st.metric("Compliance Score", f"{result['score']}/10")
-                        st.write(f"**Detailed Finding:** {result['finding']}")
-                        
-                        # --- DOWNLOAD BUTTON ---
-                        st.divider()
-                        report_text = f"""SAFETY AUDIT REPORT
--------------------
-Status: {result['status']}
-Score: {result['score']}/10
-Timestamp: 2026-02-25
--------------------
-Findings:
-{result['finding']}
--------------------
-Generated by SafetySense AI (Developer: Rushikesh Naik)
-"""
-                        st.download_button(
-                            label="📥 Download Audit Report",
-                            data=report_text,
-                            file_name=f"Safety_Audit_{result['status']}.txt",
-                            mime="text/plain"
+                    # PERFORMANCE BOOST: Using structured data config forces Gemini to output pure JSON mapping directly to our schema
+                    response = model.generate_content(
+                        [prompt, img],
+                        generation_config=genai.GenerationConfig(
+                            response_mime_type="application/json",
+                            response_schema=SafetyAuditReport
                         )
+                    )
+                    
+                    # Direct dictionary conversion (No Regex needed anymore!)
+                    import json
+                    result = json.loads(response.text)
+                    
+                    # --- ENTERPRISE UI METRICS CARDS ---
+                    st.markdown("#### Operational Assessment")
+                    
+                    if result['status'].lower() == "safe":
+                        st.markdown(f"""
+                            <div style="background-color: #064E3B; padding: 15px; border-radius: 8px; border-left: 6px solid #10B981; margin-bottom: 15px;">
+                                <strong style="color: #A7F3D0;">✅ SITE STATUS: COMPLIANT</strong>
+                            </div>
+                        """, unsafe_with_html=True)
                     else:
-                        st.write(response.text)
+                        st.markdown(f"""
+                            <div style="background-color: #7F1D1D; padding: 15px; border-radius: 8px; border-left: 6px solid #EF4444; margin-bottom: 15px;">
+                                <strong style="color: #FCA5A5;">⚠️ SITE STATUS: HSE VIOLATION DETECTED</strong>
+                            </div>
+                        """, unsafe_with_html=True)
+                    
+                    # Modern Metric Display
+                    st.metric(label="Calculated Compliance Index", value=f"{result['score']} / 10")
+                    
+                    # Technical Findings Text box
+                    st.markdown("#### System Diagnostics Summary")
+                    st.info(result['finding'])
+                    
+                    # --- AUTO GENERATED DOWNLOAD TEXT REPORT ---
+                    st.divider()
+                    report_text = f"""ENTERPRISE HSE AUDIT SCAN REPORT
+====================================
+Facility Assessment: {result['status'].upper()}
+Compliance Index Score: {result['score']}/10
+Log Timestamp: 2026-06-02
+------------------------------------
+Audit Inspection Diagnostics:
+{result['finding']}
+====================================
+System Framework: SafetySense AI
+Chief Architect: Rushikesh Naik (Data Analyst / AI Developer)
+"""
+                    st.download_button(
+                        label="📥 Export Off-line Audit Manifest",
+                        data=report_text,
+                        file_name=f"HSE_Manifest_{result['status']}.txt",
+                        mime="text/plain",
+                        use_container_width=True
+                    )
+                    
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.error(f"Execution Error during matrix compile: {e}")
     else:
-        st.info("Please upload an image to generate a report.")
+        st.info("Awaiting visual media uplink. Please drag or upload a site asset into Column 1 to initialize.")
