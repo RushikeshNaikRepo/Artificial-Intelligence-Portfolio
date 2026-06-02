@@ -133,7 +133,7 @@ if uploaded_file:
             
             st.divider()
 
-            # --- NEW FEATURE: INTERACTIVE WORKFLOW SELECTION ---
+            # --- INTERACTIVE WORKFLOW SELECTION ---
             st.write("### 🛠️ Dashboard Construction Mode")
             dashboard_mode = st.radio(
                 "Choose how you want to build your workspace views:",
@@ -147,23 +147,23 @@ if uploaded_file:
             # --------------------------------------------------------
             if dashboard_mode == "🚀 Auto-Generate Executive Dashboard":
                 
-                # Action Toolbar Row (Share, Print, Downloads UI Components)
-                tool_c1, tool_c2, tool_c3, tool_c4, tool_c5 = st.columns([2, 1, 1, 1, 1])
+                # Fixed Action Toolbar Row
+                tool_c1, tool_c2, tool_c3, tool_c4 = st.columns([3, 2, 2, 2])
                 with tool_c1:
                     st.write("#### 🖥️ Automated Operational Canvas")
                 with tool_c2:
-                    if st.button("🖨️ Print Dashboard", use_container_width=True):
-                        st.info("Triggering browser print overlay layout standard...")
+                    # Native JavaScript print execution - lets users print or 'Save as PDF' directly
+                    if st.button("📄 Print / Save as PDF", use_container_width=True):
+                        st.components.v1.html("<script>window.print();</script>", height=0, width=0)
                 with tool_c3:
                     if st.button("🔗 Share Report", use_container_width=True):
                         st.success("Shareable snapshot link copied to clipboard!")
                 with tool_c4:
-                    # Download PDF mockup
-                    st.download_button("📄 Export as PDF", data=csv_data, file_name="dashboard_snapshot.pdf", mime="application/pdf", use_container_width=True)
-                with tool_c5:
-                    # Download High-res image snapshot mockup
-                    st.download_button("🖼️ Save PNG Image", data=csv_data, file_name="dashboard_snapshot.png", mime="image/png", use_container_width=True)
+                    # Clean CSV download of the chart data source
+                    csv_data = filtered_df.to_csv(index=False).encode('utf-8')
+                    st.download_button("📥 Export Canvas Data (CSV)", data=csv_data, file_name="dashboard_data.csv", mime="text/csv", use_container_width=True)
                 
+                st.caption("💡 *Tip: To download individual charts as crisp PNG images, hover over the chart and click the 📷 (Camera) icon in the top-right toolbar!*")
                 st.write("") # Spacer
 
                 # Exact Fixed Height Grid Setup
@@ -221,6 +221,7 @@ if uploaded_file:
 
                 st.divider()
                 st.write("#### 🖥️ Custom Aligned Reporting Canvas")
+                st.caption("💡 *Tip: Hover over any rendered chart below and click the 📷 camera icon to save it as a clear PNG.*")
 
                 # Track components to render in a clean 2-column uniform layout block
                 selected_plots = []
@@ -228,7 +229,6 @@ if uploaded_file:
                 # Pre-compile structural parameters mapping safely
                 c_x = cat_cols[0] if cat_cols else (num_cols[0] if num_cols else None)
                 c_y = num_cols[0] if num_cols else None
-                c_y2 = num_cols[1] if len(num_cols) > 1 else num_cols[0]
 
                 if v_bar and c_x and c_y:
                     selected_plots.append(("Bar Chart", px.bar(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
@@ -245,7 +245,6 @@ if uploaded_file:
                 if v_box and c_x and c_y:
                     selected_plots.append(("Box Plot", px.box(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
                 if v_funnel and c_x and c_y:
-                    # Group data to ensure safe rendering sequence constraints inside a pipeline setup
                     fn_df = filtered_df.groupby(c_x)[c_y].sum().reset_index().sort_values(by=c_y, ascending=False)
                     selected_plots.append(("Funnel Chart", px.funnel(fn_df, x=c_y, y=c_x, template=theme_choice, height=CHART_HEIGHT)))
                 if v_radar and c_x and c_y:
@@ -262,11 +261,9 @@ if uploaded_file:
                 if selected_plots:
                     for idx in range(0, len(selected_plots), 2):
                         grid_cols = st.columns(2)
-                        # Plot Left Element
                         with grid_cols[0]:
                             title_l, fig_l = selected_plots[idx]
                             st.plotly_chart(fig_l, use_container_width=True)
-                        # Plot Right Element safely if current index element contains sequence pairs
                         if idx + 1 < len(selected_plots):
                             with grid_cols[1]:
                                 title_r, fig_r = selected_plots[idx + 1]
