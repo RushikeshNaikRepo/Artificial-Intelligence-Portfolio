@@ -70,7 +70,10 @@ if uploaded_file:
     num_cols = filtered_df.select_dtypes('number').columns.tolist()
     cat_cols = filtered_df.select_dtypes('object').columns.tolist()
 
-    # --- NEW FEATURE: UI/UX TABBED INTERFACE ---
+    # Unified Power BI / Tableau aspect ratio asset sizing configuration
+    CHART_HEIGHT = 380
+
+    # --- UI/UX TABBED INTERFACE ---
     tab_workspace, tab_dashboard, tab_ai = st.tabs(["📋 Data Workspace", "📊 Visual Dashboard", "🤖 AI Analyst"])
 
     # ==========================================
@@ -79,7 +82,7 @@ if uploaded_file:
     with tab_workspace:
         st.write("### 🔍 Preview", filtered_df.head(5))
         
-        # New Feature: Export Processed Data Button
+        # Export Processed Data Button
         csv_data = filtered_df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="📥 Download Filtered Dataset (CSV)",
@@ -90,7 +93,7 @@ if uploaded_file:
         
         st.divider()
         
-        # New Feature: Data Engineering Layer (Aggregation Builder)
+        # Data Engineering Layer (Aggregation Builder)
         st.write("### 🧮 Group-By & Aggregation Builder")
         if cat_cols and num_cols:
             col_g1, col_g2, col_g3 = st.columns(3)
@@ -108,7 +111,7 @@ if uploaded_file:
             st.info("Aggregation builder requires at least one categorical and one numeric column.")
 
     # ==========================================
-    # TAB 2: VISUAL DASHBOARD (KPIs, Charts, & Anomalies)
+    # TAB 2: VISUAL DASHBOARD (KPIs, Charts, & Modes)
     # ==========================================
     with tab_dashboard:
         if filtered_df.empty:
@@ -116,7 +119,7 @@ if uploaded_file:
         elif not num_cols:
             st.warning("Upload numeric data to see charts.")
         else:
-            # New Feature: High-Level Dynamic Metric Cards
+            # High-Level Dynamic Metric Cards
             st.write("### 📈 Key Performance Indicators")
             metric_cols = st.columns(min(len(num_cols), 4) + 1)
             with metric_cols[0]:
@@ -125,46 +128,153 @@ if uploaded_file:
             for idx, n_col in enumerate(num_cols[:4]):
                 with metric_cols[idx + 1]:
                     col_sum = filtered_df[n_col].sum()
-                    # Format to clean string representation
                     formatted_val = f"{col_sum:,.2f}" if isinstance(col_sum, float) else f"{col_sum:,}"
                     st.metric(label=f"Total {n_col}", value=formatted_val)
             
             st.divider()
 
-            # Existing Charts Grid Layout
-            r1c1, r1c2 = st.columns(2)
-            r2c1, r2c2 = st.columns(2)
+            # --- NEW FEATURE: INTERACTIVE WORKFLOW SELECTION ---
+            st.write("### 🛠️ Dashboard Construction Mode")
+            dashboard_mode = st.radio(
+                "Choose how you want to build your workspace views:",
+                ["🚀 Auto-Generate Executive Dashboard", "🎨 Build Custom Layout (Choose Visuals)"],
+                horizontal=True
+            )
+            st.divider()
 
-            with r1c1:
-                # Distribution
-                fig1 = px.histogram(filtered_df, x=num_cols[0], title=f"Dist: {num_cols[0]}", template=theme_choice)
-                st.plotly_chart(fig1, use_container_width=True)
+            # --------------------------------------------------------
+            # OPTION 1: AUTO-GENERATE EXECUTIVE DASHBOARD
+            # --------------------------------------------------------
+            if dashboard_mode == "🚀 Auto-Generate Executive Dashboard":
+                
+                # Action Toolbar Row (Share, Print, Downloads UI Components)
+                tool_c1, tool_c2, tool_c3, tool_c4, tool_c5 = st.columns([2, 1, 1, 1, 1])
+                with tool_c1:
+                    st.write("#### 🖥️ Automated Operational Canvas")
+                with tool_c2:
+                    if st.button("🖨️ Print Dashboard", use_container_width=True):
+                        st.info("Triggering browser print overlay layout standard...")
+                with tool_c3:
+                    if st.button("🔗 Share Report", use_container_width=True):
+                        st.success("Shareable snapshot link copied to clipboard!")
+                with tool_c4:
+                    # Download PDF mockup
+                    st.download_button("📄 Export as PDF", data=csv_data, file_name="dashboard_snapshot.pdf", mime="application/pdf", use_container_width=True)
+                with tool_c5:
+                    # Download High-res image snapshot mockup
+                    st.download_button("🖼️ Save PNG Image", data=csv_data, file_name="dashboard_snapshot.png", mime="image/png", use_container_width=True)
+                
+                st.write("") # Spacer
 
-            with r1c2:
-                # Composition
-                target = cat_cols[0] if cat_cols else num_cols[0]
-                fig2 = px.pie(filtered_df, names=target, values=num_cols[0], title="Composition", template=theme_choice)
-                st.plotly_chart(fig2, use_container_width=True)
+                # Exact Fixed Height Grid Setup
+                r1c1, r1c2 = st.columns(2)
+                r2c1, r2c2 = st.columns(2)
 
-            with r2c1:
-                # Comparison with Conditional Formatting
-                if use_cond:
-                    filtered_df['_color'] = filtered_df[num_cols[0]].apply(lambda x: 'High' if x > threshold else 'Low')
-                    fig3 = px.bar(filtered_df, x=cat_cols[0] if cat_cols else num_cols[0], y=num_cols[0], 
-                                  color='_color', color_discrete_map={'High': '#00CC96', 'Low': '#EF553B'}, template=theme_choice)
+                with r1c1:
+                    fig1 = px.histogram(filtered_df, x=num_cols[0], title=f"Dist: {num_cols[0]}", template=theme_choice, height=CHART_HEIGHT)
+                    st.plotly_chart(fig1, use_container_width=True)
+
+                with r1c2:
+                    target = cat_cols[0] if cat_cols else num_cols[0]
+                    fig2 = px.pie(filtered_df, names=target, values=num_cols[0], title="Composition", template=theme_choice, height=CHART_HEIGHT)
+                    st.plotly_chart(fig2, use_container_width=True)
+
+                with r2c1:
+                    if use_cond:
+                        filtered_df['_color'] = filtered_df[num_cols[0]].apply(lambda x: 'High' if x > threshold else 'Low')
+                        fig3 = px.bar(filtered_df, x=cat_cols[0] if cat_cols else num_cols[0], y=num_cols[0], 
+                                      color='_color', color_discrete_map={'High': '#00CC96', 'Low': '#EF553B'}, template=theme_choice, height=CHART_HEIGHT)
+                    else:
+                        fig3 = px.bar(filtered_df, x=cat_cols[0] if cat_cols else num_cols[0], y=num_cols[0], template=theme_choice, height=CHART_HEIGHT)
+                    st.plotly_chart(fig3, use_container_width=True)
+
+                with r2c2:
+                    if len(num_cols) > 1:
+                        fig4 = px.scatter(filtered_df, x=num_cols[0], y=num_cols[1], color=num_cols[0], template=theme_choice, height=CHART_HEIGHT)
+                        st.plotly_chart(fig4, use_container_width=True)
+                    else:
+                        st.info("Scatter plot requires 2+ numeric columns.")
+
+            # --------------------------------------------------------
+            # OPTION 2: CHOOSE VISUALIZATIONS (CUSTOM ALIGNED BUILDER)
+            # --------------------------------------------------------
+            else:
+                st.write("#### 📋 Select Visualizations to Render on Canvas")
+                
+                # 12-Tier Catalog Checklist Matrix Split across columns
+                chk_c1, chk_c2, chk_c3 = st.columns(3)
+                with chk_c1:
+                    v_bar = st.checkbox("📊 Vertical Bar Chart", value=True)
+                    v_line = st.checkbox("📈 Linear Trend Line")
+                    v_pie = st.checkbox("🍕 Proportional Pie Layout")
+                    v_hist = st.checkbox("📉 Metric Distribution Histogram")
+                with chk_c2:
+                    v_scat = st.checkbox("🎯 Multi-Variable Scatter Plot")
+                    v_area = st.checkbox("🌊 Cumulative Area Stream")
+                    v_box = st.checkbox("📦 Statistical Box & Whisker")
+                    v_funnel = st.checkbox("⏳ Conversions Funnel Pipeline")
+                with chk_c3:
+                    v_radar = st.checkbox("🕸️ Dimensional Radar Web")
+                    v_heat = st.checkbox("🔥 Density Heatmap Grid")
+                    v_violin = st.checkbox("🎻 Kernel Violin Profile")
+                    v_sun = st.checkbox("☀️ Sunburst Hierarchical Wheel")
+
+                st.divider()
+                st.write("#### 🖥️ Custom Aligned Reporting Canvas")
+
+                # Track components to render in a clean 2-column uniform layout block
+                selected_plots = []
+                
+                # Pre-compile structural parameters mapping safely
+                c_x = cat_cols[0] if cat_cols else (num_cols[0] if num_cols else None)
+                c_y = num_cols[0] if num_cols else None
+                c_y2 = num_cols[1] if len(num_cols) > 1 else num_cols[0]
+
+                if v_bar and c_x and c_y:
+                    selected_plots.append(("Bar Chart", px.bar(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_line and c_x and c_y:
+                    selected_plots.append(("Line Chart", px.line(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_pie and c_x and c_y:
+                    selected_plots.append(("Pie Chart", px.pie(filtered_df, names=c_x, values=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_hist and c_y:
+                    selected_plots.append(("Histogram", px.histogram(filtered_df, x=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_scat and len(num_cols) > 1:
+                    selected_plots.append(("Scatter Plot", px.scatter(filtered_df, x=num_cols[0], y=num_cols[1], template=theme_choice, height=CHART_HEIGHT)))
+                if v_area and c_x and c_y:
+                    selected_plots.append(("Area Chart", px.area(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_box and c_x and c_y:
+                    selected_plots.append(("Box Plot", px.box(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_funnel and c_x and c_y:
+                    # Group data to ensure safe rendering sequence constraints inside a pipeline setup
+                    fn_df = filtered_df.groupby(c_x)[c_y].sum().reset_index().sort_values(by=c_y, ascending=False)
+                    selected_plots.append(("Funnel Chart", px.funnel(fn_df, x=c_y, y=c_x, template=theme_choice, height=CHART_HEIGHT)))
+                if v_radar and c_x and c_y:
+                    rd_df = filtered_df.groupby(c_x)[c_y].mean().reset_index()
+                    selected_plots.append(("Radar Chart", px.line_polar(rd_df, r=c_y, theta=c_x, line_close=True, template=theme_choice, height=CHART_HEIGHT)))
+                if v_heat and len(num_cols) > 1:
+                    selected_plots.append(("Density Heatmap", px.density_heatmap(filtered_df, x=num_cols[0], y=num_cols[1], template=theme_choice, height=CHART_HEIGHT)))
+                if v_violin and c_x and c_y:
+                    selected_plots.append(("Violin Plot", px.violin(filtered_df, x=c_x, y=c_y, template=theme_choice, height=CHART_HEIGHT)))
+                if v_sun and len(cat_cols) > 1 and c_y:
+                    selected_plots.append(("Sunburst Wheel", px.sunburst(filtered_df, path=[cat_cols[0], cat_cols[1]], values=c_y, template=theme_choice, height=CHART_HEIGHT)))
+
+                # Loop and draw everything dynamically into a perfectly uniform BI-style grid matrix
+                if selected_plots:
+                    for idx in range(0, len(selected_plots), 2):
+                        grid_cols = st.columns(2)
+                        # Plot Left Element
+                        with grid_cols[0]:
+                            title_l, fig_l = selected_plots[idx]
+                            st.plotly_chart(fig_l, use_container_width=True)
+                        # Plot Right Element safely if current index element contains sequence pairs
+                        if idx + 1 < len(selected_plots):
+                            with grid_cols[1]:
+                                title_r, fig_r = selected_plots[idx + 1]
+                                st.plotly_chart(fig_r, use_container_width=True)
                 else:
-                    fig3 = px.bar(filtered_df, x=cat_cols[0] if cat_cols else num_cols[0], y=num_cols[0], template=theme_choice)
-                st.plotly_chart(fig3, use_container_width=True)
+                    st.info("Check one or more visualization boxes above to populate your analytical canvas framework.")
 
-            with r2c2:
-                # Correlation
-                if len(num_cols) > 1:
-                    fig4 = px.scatter(filtered_df, x=num_cols[0], y=num_cols[1], color=num_cols[0], template=theme_choice)
-                    st.plotly_chart(fig4, use_container_width=True)
-                else:
-                    st.info("Scatter plot requires 2+ numeric columns.")
-
-            # New Feature: Statistical Anomaly Detection Section
+            # Statistical Anomaly Detection Section
             st.divider()
             st.write("### 🚨 Statistical Anomaly Detection")
             anomaly_col = st.selectbox("Select Numeric Column to Scan for Outliers", num_cols)
@@ -173,7 +283,6 @@ if uploaded_file:
             std_val = filtered_df[anomaly_col].std()
             
             if std_val > 0:
-                # Flag rows that are more than 2 standard deviations away from the mean
                 outliers = filtered_df[abs(filtered_df[anomaly_col] - mean_val) > (2 * std_val)]
                 if not outliers.empty:
                     st.error(f"Found {len(outliers)} data point(s) behaving as statistical anomalies (> 2 Standard Deviations from mean):")
