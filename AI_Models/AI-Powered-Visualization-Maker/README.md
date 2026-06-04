@@ -39,7 +39,3 @@ This application acts as an automated analytics layer, enabling technical genera
 * **File Processing Core:** OpenPyXL
 
 ---
-
-## 📂 Project Structure
-
-```text
