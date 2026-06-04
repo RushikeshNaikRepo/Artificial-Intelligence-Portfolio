@@ -1,26 +1,45 @@
-# AI-Powered Visualization Maker
+# 📊 AI-Powered Visualization Maker (Stable Edition)
 
-Building dashboards usually takes hours of cleaning data and dragging-and-dropping charts. I built this tool to speed up that process by using AI to handle the heavy lifting. This app allows anyone to upload a dataset and get instant, professional-grade insights through an interactive dashboard and an AI-driven chat interface.
+An enterprise-ready, interactive self-service data engineering and visualization application built with **Streamlit**, **Plotly**, and **Groq LLM**.
+This application acts as an automated analytics layer, enabling technical generalists and analysts to transition instantly from multi-sheet raw files to pristine dashboards, automated aggregation pipelines, and deep-dive conversational AI insights.
 
-## 📊 What this app does
-I designed this tool to be a "one-stop shop" for data exploration. Instead of writing complex code to see your data, you can just upload your file and start analyzing.
+---
 
-* **Smart Data Loading:** Supports both CSV and multi-sheet Excel files.
-* **Automated Joins:** If you upload multiple sheets, the app helps you join them by detecting common keys and relationship cardinality (1:M, M:1, etc.).
-* **Dynamic Dashboarding:** Automatically generates distribution, composition, and correlation charts.
-* **AI Data Analyst:** There is a built-in chat window powered by Groq and Llama 3. You can ask it specific questions like "Which order IDs are in the Electronics category?" and it will scan the actual data rows to give you an answer.
+## 🚀 Core Features
 
-## 🛠️ The Tech Stack
-I kept the architecture lightweight but powerful:
-* **Python** – The core logic.
-* **Streamlit** – For the web interface and UI.
-* **Plotly** – For the interactive visualizations.
-* **Groq & Google Gemini** – To power the data reasoning and structural logic.
+### 📋 1. Advanced Data Engineering Sandbox
+* **Dynamic Multi-Sheet Loading:** Safely ingests local CSV or multi-tab Excel (`.xlsx`) books into localized memory mapping structures.
+* **Smart Inner Join Core:** Automatically identifies common primary/foreign key columns across disjoint datasets and enables one-click inner merges (`pd.merge`).
+* **Aggregation/Group-By Builder:** Implements a declarative SQL-like data transformation workbench right in the UI (`sum`, `mean`, `count`, `min`, `max`).
+* **Refined Data Export:** Clean export pathways to download completely transformed, inner-joined, or filtered states back into standardized CSV files.
 
-## 🚀 How to use it
-1. Upload your dataset (Excel or CSV).
-2. Use the sidebar to select your visual theme and filter the columns you care about.
-3. If you have specific questions, type them into the AI Chat at the bottom to get instant row-level analysis.
+### 📊 2. High-Performance Visual Canvas (Power BI / Tableau Sizing)
+* **Two Operating Canvas Workflows:**
+  1. **Executive Auto-Dashboard:** Instantly deploys a beautifully configured, multi-variable 2x2 report plane (Distribution, Composition, Segment Comparison, and Correlation).
+  2. **Custom Layout Builder:** Allows an on-demand checklist rendering of **12 professional chart matrix configurations** (including Box Plots, Funnel Pipelines, Radar Webs, and Sunburst Hierarchical Wheels).
+* **Pixel-Perfect Alignment:** Locked aspect ratios (`height=380`) mirror enterprise BI interfaces for consistent layouts across any data type.
+* **On-the-Fly Conditional Formatting:** Interactive color-mapping injections highlighting targets above or below variable thresholds (e.g., Teal for High, Coral for Low).
+* **Dynamic Metric ribbons:** Top-level dynamic KPI scorecards displaying continuous sums and transactional row scales.
 
-## 💡 Why I built this
-As a Data Analyst, I wanted to create a bridge between raw data and decision-making. This project was a great way for me to practice integrating Generative AI with traditional BI tools, making data more accessible for people who aren't necessarily "tech-savvy" but need quick answers.
+### 🚨 3. Statistical Profiling & Outlier Scanning
+* **Sigma Outlier Detector:** Evaluates targeted numerical parameters to spot rows running outside $2\sigma$ (Standard Deviations) from historical means, instantly exposing tracking spikes or data anomalies.
+
+### 🤖 4. Context-Aware AI Analyst
+* **Groq Llama 3.3 Engine:** Integrated chat window bound to an expert data analyst persona.
+* **Defensive Token Consumption:** Automatically converts top-tier records of the parsed data matrix into structured context frames to feed deep analytical reasoning without overloading text window constraints.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+* **Front-End & State Controls:** Streamlit (Wide Layout Framework)
+* **Data Processing Layer:** Pandas / NumPy
+* **Visualization Engine:** Plotly Express Grid Rendering
+* **AI Engine:** Groq API SDK (`llama-3.3-70b-versatile`)
+* **File Processing Core:** OpenPyXL
+
+---
+
+## 📂 Project Structure
+
+```text
