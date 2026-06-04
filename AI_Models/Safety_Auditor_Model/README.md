@@ -1,35 +1,28 @@
-🛡️ SafetySense AI: The Automated Worksite Inspector
-SafetySense AI is an intelligent vision tool designed to assist construction and warehouse managers in maintaining rigorous safety standards. By replacing manual oversight with automated AI analysis, the platform ensures that safety protocols are followed consistently and objectively.
+# 🛡️ SafetySense AI Auditor
 
-📌 Project Overview
-In large-scale industrial environments, monitoring every corner of a site simultaneously is a significant challenge. SafetySense AI allows managers to upload photos or video stills to receive an instantaneous "Safety Audit." The AI "looks" at the workspace to identify compliance with safety gear and detect environmental hazards before accidents occur.
+**Enterprise-Grade HSE Compliance & Personal Protective Equipment (PPE) Detection System**
+> **Engineered by Rushikesh Naik (Data Analyst / AI Developer)**
 
-🚀 Key Features
-Instant PPE Detection: Automatically identifies hard hats, high-visibility vests, and safety glasses.
+---
 
-Hazard Spotting: Detects cluttered walkways, blocked emergency exits, or high-risk behaviors.
+## 📖 Overview
 
-Safety Scoring: Generates a simple risk grade from 1 to 10, providing an immediate snapshot of site safety.
+**SafetySense AI Auditor** is a high-reliability, automated computer vision application built to streamline Health, Safety, and Environment (HSE) site compliance inspections. 
 
-Automated Reporting: Findings can be downloaded as a text file for integration into daily safety logs and compliance records.
+By leveraging the cutting-edge **Google Gemini 3 Flash** multimodal architecture, this system analyzes worksite imagery in real-time. It validates the active usage of mandatory field gear—such as hard hats (helmets), high-visibility vests, and protective gloves—while diagnosing hidden structural risks, open hazards, or house-keeping discrepancies.
 
-🛠️ The Tech Stack
-The Brain: Powered by Google Gemini 3 Flash (Multimodal AI capable of sophisticated visual reasoning).
+Unlike fragile text-parsing wrappers, this production-ready application uses native API **Structured Outputs** via Pydantic schemas, guaranteeing zero-fail JSON data transmission directly into an enterprise metrics interface.
 
-The Body: Built with Streamlit, transforming Python logic into a clean, interactive web interface.
+---
 
-Language: Written entirely in Python.
+## ✨ Key Features
 
-📖 How to Use
-Access: Open the live application link.
+* **📷 Multimodal Computer Vision Engine:** Captures, optimizes, and processes site photographic assets instantly using advanced visual sequence alignment.
+* **🦺 Rigorous PPE Validation:** Cross-references field workers against strict compliance baselines (detecting presence/absence of hard hats, high-vis vests, hand protection, and boots).
+* **⚠️ Active Hazard Diagnosis:** Identifies site vulnerabilities including unmitigated structural openings, trip hazards, and heavy machinery proximity risks.
+* **🛡️ Zero-Fail Structured Outputs:** Enforces a rigid JSON data schema (`status`, `score`, `finding`) using Pydantic, bypassing error-prone Regex parsing completely.
+* **⚡ High-Efficiency Optimization:** Automatically downscales uploaded high-resolution mobile/field assets to a strict `1920px` boundary layer to optimize network payload handling and minimize API latency.
+* **📊 Clean Operational Metrics:** Renders real-time native pass/fail alert notification layouts alongside high-visibility numeric index scorecards.
+* **📥 One-Click Offline Manifest Export:** Instantly generates and packages text-based compliance manifests complete with localized timestamps for legacy reporting pipelines.
 
-Upload: Provide a photo of your workspace or construction site (JPG/PNG).
-
-Analyze: Click the "Run Safety Audit" button.
-
-Review: Evaluate the safety score and detailed findings.
-
-Export: Download the report to save for your official records.
-
-👨‍💻 About the Developer
-Rushikesh Naik Data Analyst & AI Strategy Specialist I am a Data Analyst passionate about building AI tools that solve real-world problems. This project represents the intersection of my expertise in data strategy, automation, and a commitment to workplace safety.
+---
